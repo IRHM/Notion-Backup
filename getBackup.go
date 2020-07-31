@@ -73,14 +73,17 @@ func enqueueTask() string {
 		},
 	}
 
+	// Serialize json request
 	reqBody, err := json.Marshal(t)
 
 	if err != nil {
 		print("error")
 	}
 
+	// Send request
 	reply := requestData("enqueueTask", reqBody)
 
+	// Deserialize json response
 	end := exportRequestResponse{}
 	json.Unmarshal(reply, &end)
 
@@ -122,11 +125,12 @@ func downloadExport(taskID string) {
 			}
 		}
 
+		// Wait an extra second and tell user
 		fmt.Println("Checking if file is done again in 2 seconds...")
 		time.Sleep(1000 * time.Millisecond)
 	}
 
-	// Download file
+	// Download file to 'export.zip'
 
 	// Get the response bytes from the url
 	resp, err := http.Get(exportURL)
