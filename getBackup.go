@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -87,6 +90,7 @@ func enqueueTask() string {
 func downloadExport(taskID string) {
 	var exportURL string
 
+	// Get exportURL
 	for {
 		// Give some time for export file to be created
 		time.Sleep(1000 * time.Millisecond)
@@ -95,22 +99,52 @@ func downloadExport(taskID string) {
 			TaskIDs: []string{taskID},
 		}
 
+		// Serialize json request
 		reqBody, err := json.Marshal(t)
 
 		if err != nil {
 			print("Error serializing json: ", err)
 		}
 
+		// Request task info
 		reply := requestData("getTasks", reqBody)
 
+		// Deserialize json response
 		end := getTasksResponse{}
 		json.Unmarshal(reply, &end)
 
-		if end.Results[0].Status.Type == "complete" {
-			exportURL = end.Results[0].Status.ExportURL
-			break
+		// If status is complete, break from loop and set exportURL var
+		if end.Results != nil {
+			s := end.Results[0].Status
+			if s != nil && s.Type == "complete" {
+				exportURL = s.ExportURL
+				break
+			}
 		}
+
+		fmt.Println("Checking if file is done again in 2 seconds...")
+		time.Sleep(1000 * time.Millisecond)
 	}
 
-	fmt.Println(exportURL)
+	// Download file
+
+	// Get the response bytes from the url
+	resp, err := http.Get(exportURL)
+	if err != nil {
+		print("Error downloading file: ", err)
+	}
+	defer resp.Body.Close()
+
+	// Create an empty file
+	file, err := os.Create("export.zip")
+	if err != nil {
+		print("Error creating file: ", err)
+	}
+	defer file.Close()
+
+	// Write the bytes to the file
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		print("Error writing to file: ", err)
+	}
 }
