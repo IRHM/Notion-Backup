@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -53,7 +54,9 @@ type getTasksResponseStatus struct {
 
 func getBackup() {
 	taskID := enqueueTask()
-	downloadExport(taskID)
+	filePath := downloadExport(taskID)
+
+	fmt.Println(filePath)
 }
 
 // Returns taskId
@@ -90,7 +93,7 @@ func enqueueTask() string {
 	return end.TaskID
 }
 
-func downloadExport(taskID string) {
+func downloadExport(taskID string) string {
 	var exportURL string
 
 	// Get exportURL
@@ -131,6 +134,7 @@ func downloadExport(taskID string) {
 	}
 
 	// Download file to 'export.zip'
+	var filename string = "export.zip"
 
 	// Get the response bytes from the url
 	resp, err := http.Get(exportURL)
@@ -140,10 +144,11 @@ func downloadExport(taskID string) {
 	defer resp.Body.Close()
 
 	// Create an empty file
-	file, err := os.Create("export.zip")
+	file, err := os.Create(filename)
 	if err != nil {
 		print("Error creating file: ", err)
 	}
+
 	defer file.Close()
 
 	// Write the bytes to the file
@@ -151,4 +156,13 @@ func downloadExport(taskID string) {
 	if err != nil {
 		print("Error writing to file: ", err)
 	}
+
+	// Return downloaded files full path
+	path, err := filepath.Abs(filename)
+
+	if err != nil {
+		print("Error getting exported zips absolute path ", err)
+	}
+
+	return path
 }
