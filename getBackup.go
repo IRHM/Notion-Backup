@@ -9,68 +9,43 @@ import (
 	"time"
 )
 
-type task struct {
-	eventName string
-	request   request
+type exportRequest struct {
+	Task *exportTask `json:"task"`
 }
 
-type request struct {
-	blockId       string
-	recursive     bool
-	exportOptions exportOptions
+type exportTask struct {
+	EventName string             `json:"eventName"`
+	Request   *exportTaskRequest `json:"request"`
 }
 
-type exportOptions struct {
-	exportType string
-	timeZone   string
-	locale     string
+type exportTaskRequest struct {
+	BlockID       string                    `json:"blockId"`
+	Recursive     bool                      `json:"recursive"`
+	ExportOptions *exportTaskRequestOptions `json:"exportOptions"`
+}
+
+type exportTaskRequestOptions struct {
+	ExportType string `json:"exportType"`
+	TimeZone   string `json:"timeZone"`
+	Locale     string `json:"locale"`
 }
 
 func getBackup() {
-	data := []byte(`{}`)
-
-	req, err := http.NewRequest("POST", "https://www.notion.so/api/v3/loadUserContent", bytes.NewBuffer(data))
-
-	if err != nil {
-		print("Error")
-	}
-
-	req.Header.Set("x-notion-active-user-header", "")
-
-	req.AddCookie(&http.Cookie{Name: "__cfduid", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "notion_browser_id", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "notion_locale", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "intercom-id-gpfdrxfd", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "intercom-session-gpfdrxfd", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "token_v2", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "notion_user_id", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "notion_users", Value: ""})
-	req.AddCookie(&http.Cookie{Name: "logglytrackingsession", Value: ""})
-
-	client := &http.Client{Timeout: time.Second * 10}
-
-	resp, err := client.Do(req)
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		print("Error reading body. ")
-	}
-
-	fmt.Printf("%s\n", body)
-
-	//enqueueTask()
+	enqueueTask()
 }
 
 func enqueueTask() {
-	t := task{
-		eventName: "exportBlock",
-		request: request{
-			blockId:   "token",
-			recursive: true,
-			exportOptions: exportOptions{
-				exportType: "markdown",
-				timeZone:   "Europe/London",
-				locale:     "en",
+	t := &exportRequest{
+		Task: &exportTask{
+			EventName: "exportBlock",
+			Request: &exportTaskRequest{
+				BlockID:   "",
+				Recursive: true,
+				ExportOptions: &exportTaskRequestOptions{
+					ExportType: "markdown",
+					TimeZone:   "Europe/London",
+					Locale:     "en",
+				},
 			},
 		},
 	}
@@ -81,10 +56,29 @@ func enqueueTask() {
 		print("error")
 	}
 
-	fmt.Printf("%+v\n", t)
-	print("reqBody", reqBody)
+	fmt.Println(t)
 
-	r := post(string("https://www.notion.so/api/v3/enqueueTask"), reqBody)
+	req, err := http.NewRequest("POST", "https://www.notion.so/api/v3/enqueueTask", bytes.NewBuffer(reqBody))
 
-	print(r)
+	if err != nil {
+		print("Error")
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+
+	req.AddCookie(&http.Cookie{Name: "token_v2", Value: ""})
+
+	client := &http.Client{Timeout: time.Second * 10}
+
+	resp, err := client.Do(req)
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		print("Error reading body. ")
+	}
+
+	fmt.Printf("%s\n", body)
 }
