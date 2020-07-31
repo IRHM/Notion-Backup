@@ -1,6 +1,13 @@
 package main
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
 
 type task struct {
 	eventName string
@@ -20,7 +27,38 @@ type exportOptions struct {
 }
 
 func getBackup() {
-	enqueueTask()
+	data := []byte(`{}`)
+
+	req, err := http.NewRequest("POST", "https://www.notion.so/api/v3/loadUserContent", bytes.NewBuffer(data))
+
+	if err != nil {
+		print("Error")
+	}
+
+	req.Header.Set("x-notion-active-user-header", "")
+
+	req.AddCookie(&http.Cookie{Name: "__cfduid", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "notion_browser_id", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "notion_locale", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "intercom-id-gpfdrxfd", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "intercom-session-gpfdrxfd", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "token_v2", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "notion_user_id", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "notion_users", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "logglytrackingsession", Value: ""})
+
+	client := &http.Client{Timeout: time.Second * 10}
+
+	resp, err := client.Do(req)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		print("Error reading body. ")
+	}
+
+	fmt.Printf("%s\n", body)
+
+	//enqueueTask()
 }
 
 func enqueueTask() {
@@ -28,7 +66,7 @@ func enqueueTask() {
 		eventName: "exportBlock",
 		request: request{
 			blockId:   "token",
-			recursive: false,
+			recursive: true,
 			exportOptions: exportOptions{
 				exportType: "markdown",
 				timeZone:   "Europe/London",
@@ -42,6 +80,9 @@ func enqueueTask() {
 	if err != nil {
 		print("error")
 	}
+
+	fmt.Printf("%+v\n", t)
+	print("reqBody", reqBody)
 
 	r := post(string("https://www.notion.so/api/v3/enqueueTask"), reqBody)
 
