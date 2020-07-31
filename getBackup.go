@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"time"
 )
 
@@ -27,34 +30,11 @@ type exportTaskRequestOptions struct {
 	Locale     string `json:"locale"`
 }
 
-type exportRequestResponse struct {
-	TaskID string `json:"taskId"`
-}
-
-type getTasks struct {
-	TaskIDs []string `json:"taskIds"`
-}
-
-type getTasksResponse struct {
-	Results []*getTasksResponseResults `json:"results"`
-}
-
-type getTasksResponseResults struct {
-	Status *getTasksResponseStatus `json:"status"`
-}
-
-type getTasksResponseStatus struct {
-	Type      string `json:"type"`
-	ExportURL string `json:"exportURL"`
-}
-
 func getBackup() {
-	taskID := enqueueTask()
-	downloadExport(taskID)
+	enqueueTask()
 }
 
-// Returns taskId
-func enqueueTask() string {
+func enqueueTask() {
 	t := &exportRequest{
 		Task: &exportTask{
 			EventName: "exportBlock",
@@ -76,41 +56,29 @@ func enqueueTask() string {
 		print("error")
 	}
 
-	reply := requestData("enqueueTask", reqBody)
+	fmt.Println(t)
 
-	end := exportRequestResponse{}
-	json.Unmarshal(reply, &end)
+	req, err := http.NewRequest("POST", "https://www.notion.so/api/v3/enqueueTask", bytes.NewBuffer(reqBody))
 
-	return end.TaskID
-}
-
-func downloadExport(taskID string) {
-	var exportURL string
-
-	for {
-		// Give some time for export file to be created
-		time.Sleep(1000 * time.Millisecond)
-
-		t := getTasks{
-			TaskIDs: []string{taskID},
-		}
-
-		reqBody, err := json.Marshal(t)
-
-		if err != nil {
-			print("Error serializing json: ", err)
-		}
-
-		reply := requestData("getTasks", reqBody)
-
-		end := getTasksResponse{}
-		json.Unmarshal(reply, &end)
-
-		if end.Results[0].Status.Type == "complete" {
-			exportURL = end.Results[0].Status.ExportURL
-			break
-		}
+	if err != nil {
+		print("Error")
 	}
 
-	fmt.Println(exportURL)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+
+	req.AddCookie(&http.Cookie{Name: "token_v2", Value: ""})
+
+	client := &http.Client{Timeout: time.Second * 10}
+
+	resp, err := client.Do(req)
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		print("Error reading body. ")
+	}
+
+	fmt.Printf("%s\n", body)
 }
