@@ -12,35 +12,44 @@ type settings struct {
 	APITokenV2 string `json:"API_TOKEN_V2"`
 }
 
+// APITokenV2 setting
+var APITokenV2 string
+
 func getSettings() error {
-	err := readSettings(getSettingsFile())
+	file := getSettingsFile()
+
+	s, err := readSettings(file)
 	if err != nil {
 		return errors.New("Error getting settings: " + err.Error())
 	}
 
-	return nil
-}
-
-func readSettings(file string) error {
-	// Read settings file
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return err
-	} else if len(data) < 1 {
+	if len(s) < 1 {
 		// If settings file is empty then ask user for settings and write them
-		writeSettings(file)
+		err := writeSettings(file)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		// Re-read settings
-		readSettings(file)
+		s, err = readSettings(file)
 	}
 
 	// Deserialize json settings
 	end := settings{}
-	json.Unmarshal(data, &end)
+	json.Unmarshal(s, &end)
 
-	fmt.Println(end.APITokenV2)
+	APITokenV2 = end.APITokenV2
 
 	return nil
+}
+
+func readSettings(file string) ([]byte, error) {
+	// Read settings file
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		return []byte(""), err
+	}
+
+	return data, nil
 }
 
 func writeSettings(file string) error {
@@ -60,7 +69,7 @@ func writeSettings(file string) error {
 	}
 
 	// Write settings
-	ioutil.WriteFile(getSettingsFile(), settingsJSON, 0644)
+	ioutil.WriteFile(file, settingsJSON, 0644)
 
 	return nil
 }

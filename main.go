@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
+	// Get settings from settings.json
+	// If they don't exist, create them
 	err := getSettings()
 	if err != nil {
 		fmt.Println("Error getting settings: ", err)

@@ -20,7 +20,7 @@ func requestData(apiFile string, reqBody []byte) []byte {
 	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
 
 	// Add api token in cookies
-	req.AddCookie(&http.Cookie{Name: "token_v2", Value: ""})
+	req.AddCookie(&http.Cookie{Name: "token_v2", Value: APITokenV2})
 
 	// Create client
 	client := &http.Client{Timeout: time.Second * 10}
