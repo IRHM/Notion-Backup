@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"os"
+)
 
 func main() {
 	//getSettings()
@@ -8,19 +10,18 @@ func main() {
 	// Download backup a get full path to it
 	files := getBackup()
 
-	for _, val := range files {
-		fmt.Println(val)
+	// Foreach export zip, extract to 'export' folder then delete zip
+	for _, file := range files {
+		// Extract downloaded backup
+		err := extract(file, "./export")
+		if err != nil {
+			print(err.Error)
+		}
+
+		// Delete zip
+		err = os.Remove(file)
+		if err != nil {
+			print(err.Error)
+		}
 	}
-
-	// // Extract downloaded backup
-	// err := extract(file, "./export")
-	// if err != nil {
-	// 	print(err.Error)
-	// }
-
-	// // Delete zip
-	// err = os.Remove(file)
-	// if err != nil {
-	// 	print(err.Error)
-	// }
 }
