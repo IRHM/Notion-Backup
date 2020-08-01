@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -52,44 +53,60 @@ type getTasksResponseStatus struct {
 	ExportURL string `json:"exportURL"`
 }
 
-func getBackup() string {
-	taskID := enqueueTask()
-	filePath := downloadExport(taskID)
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	return filePath
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func getBackup() {
+	enqueueTask()
+	// filePath := downloadExport(taskID)
+
+	// return filePath
 }
 
 // Returns taskId
-func enqueueTask() string {
-	t := &exportRequest{
-		Task: &exportTask{
-			EventName: "exportBlock",
-			Request: &exportTaskRequest{
-				BlockID:   "",
-				Recursive: true,
-				ExportOptions: &exportTaskRequestOptions{
-					ExportType: "markdown",
-					TimeZone:   "Europe/London",
-					Locale:     "en",
+func enqueueTask() {
+	blockIDS := getPages()
+
+	for _, val := range blockIDS {
+		fmt.Println("Working on: ", val)
+
+		t := &exportRequest{
+			Task: &exportTask{
+				EventName: "exportBlock",
+				Request: &exportTaskRequest{
+					BlockID:   val,
+					Recursive: true,
+					ExportOptions: &exportTaskRequestOptions{
+						ExportType: "markdown",
+						TimeZone:   "Europe/London",
+						Locale:     "en",
+					},
 				},
 			},
-		},
+		}
+
+		// Serialize json request
+		reqBody, err := json.Marshal(t)
+		if err != nil {
+			print("error")
+		}
+
+		// Send request
+		reply := requestData("enqueueTask", reqBody)
+
+		// Deserialize json response
+		end := exportRequestResponse{}
+		json.Unmarshal(reply, &end)
+
+		downloadExport(end.TaskID)
 	}
-
-	// Serialize json request
-	reqBody, err := json.Marshal(t)
-	if err != nil {
-		print("error")
-	}
-
-	// Send request
-	reply := requestData("enqueueTask", reqBody)
-
-	// Deserialize json response
-	end := exportRequestResponse{}
-	json.Unmarshal(reply, &end)
-
-	return end.TaskID
 }
 
 func downloadExport(taskID string) string {
@@ -131,8 +148,9 @@ func downloadExport(taskID string) string {
 		time.Sleep(1000 * time.Millisecond)
 	}
 
-	// Download file to 'export.zip'
-	var filename string = "export.zip"
+	// Download file to 'export<randomstr>.zip'
+	rand.Seed(time.Now().UnixNano())
+	var filename string = "export" + randSeq(10) + ".zip"
 
 	// Get the response bytes from the url
 	resp, err := http.Get(exportURL)

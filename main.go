@@ -1,20 +1,20 @@
 package main
 
-import "os"
-
 func main() {
+	//getSettings()
+
 	// Download backup a get full path to it
-	file := getBackup()
+	getBackup()
 
-	// Extract downloaded backup
-	err := extract(file, "./export")
-	if err != nil {
-		print(err.Error)
-	}
+	// // Extract downloaded backup
+	// err := extract(file, "./export")
+	// if err != nil {
+	// 	print(err.Error)
+	// }
 
-	// Delete zip
-	err = os.Remove(file)
-	if err != nil {
-		print(err.Error)
-	}
+	// // Delete zip
+	// err = os.Remove(file)
+	// if err != nil {
+	// 	print(err.Error)
+	// }
 }
