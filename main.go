@@ -1,10 +1,16 @@
 package main
 
+import "fmt"
+
 func main() {
 	//getSettings()
 
 	// Download backup a get full path to it
-	getBackup()
+	files := getBackup()
+
+	for _, val := range files {
+		fmt.Println(val)
+	}
 
 	// // Extract downloaded backup
 	// err := extract(file, "./export")

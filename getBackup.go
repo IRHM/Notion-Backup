@@ -63,15 +63,13 @@ func randSeq(n int) string {
 	return string(b)
 }
 
-func getBackup() {
-	enqueueTask()
-	// filePath := downloadExport(taskID)
-
-	// return filePath
+// Return all file paths of exported zips
+func getBackup() []string {
+	return enqueueTask()
 }
 
-// Returns taskId
-func enqueueTask() {
+func enqueueTask() []string {
+	var exportedFiles []string
 	blockIDS := getPages()
 
 	for _, val := range blockIDS {
@@ -105,8 +103,10 @@ func enqueueTask() {
 		end := exportRequestResponse{}
 		json.Unmarshal(reply, &end)
 
-		downloadExport(end.TaskID)
+		exportedFiles = append(exportedFiles, downloadExport(end.TaskID))
 	}
+
+	return exportedFiles
 }
 
 func downloadExport(taskID string) string {
