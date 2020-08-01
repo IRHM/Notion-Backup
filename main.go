@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"os"
 )
 
 func main() {
-	//getSettings()
+	err := getSettings()
+	if err != nil {
+		fmt.Println("Error getting settings: ", err)
+	}
 
 	// Download backup a get full path to it
 	files := getBackup()
