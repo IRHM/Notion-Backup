@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Extract then delete zip
+// Extract zip
 func extract(file string, dest string) error {
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
 
