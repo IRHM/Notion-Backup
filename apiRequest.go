@@ -10,7 +10,6 @@ import (
 func requestData(apiFile string, reqBody []byte) []byte {
 	// Create new HTTP POST request
 	req, err := http.NewRequest("POST", "https://www.notion.so/api/v3/"+apiFile, bytes.NewBuffer(reqBody))
-
 	if err != nil {
 		print("POST request error: ", err)
 	}
@@ -31,7 +30,6 @@ func requestData(apiFile string, reqBody []byte) []byte {
 
 	// Read response from req
 	body, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
 		print("Error reading response body: ", err)
 	}

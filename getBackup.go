@@ -52,11 +52,11 @@ type getTasksResponseStatus struct {
 	ExportURL string `json:"exportURL"`
 }
 
-func getBackup() {
+func getBackup() string {
 	taskID := enqueueTask()
 	filePath := downloadExport(taskID)
 
-	fmt.Println(filePath)
+	return filePath
 }
 
 // Returns taskId
@@ -78,7 +78,6 @@ func enqueueTask() string {
 
 	// Serialize json request
 	reqBody, err := json.Marshal(t)
-
 	if err != nil {
 		print("error")
 	}
@@ -107,7 +106,6 @@ func downloadExport(taskID string) string {
 
 		// Serialize json request
 		reqBody, err := json.Marshal(t)
-
 		if err != nil {
 			print("Error serializing json: ", err)
 		}
@@ -148,7 +146,6 @@ func downloadExport(taskID string) string {
 	if err != nil {
 		print("Error creating file: ", err)
 	}
-
 	defer file.Close()
 
 	// Write the bytes to the file
@@ -159,7 +156,6 @@ func downloadExport(taskID string) string {
 
 	// Return downloaded files full path
 	path, err := filepath.Abs(filename)
-
 	if err != nil {
 		print("Error getting exported zips absolute path ", err)
 	}
