@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -53,16 +52,6 @@ type getTasksResponseStatus struct {
 	ExportURL string `json:"exportURL"`
 }
 
-var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-func randSeq(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
-
 // Return all file paths of exported zips
 func getBackup() []string {
 	return enqueueTask()
@@ -103,6 +92,7 @@ func enqueueTask() []string {
 		end := exportRequestResponse{}
 		json.Unmarshal(reply, &end)
 
+		// Download export and add its full path to 'exportedFiles'
 		exportedFiles = append(exportedFiles, downloadExport(end.TaskID))
 	}
 
@@ -149,8 +139,7 @@ func downloadExport(taskID string) string {
 	}
 
 	// Download file to 'export<randomstr>.zip'
-	rand.Seed(time.Now().UnixNano())
-	var filename string = "export" + randSeq(10) + ".zip"
+	var filename string = "export" + randomStr(10) + ".zip"
 
 	// Get the response bytes from the url
 	resp, err := http.Get(exportURL)
