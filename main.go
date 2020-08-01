@@ -30,4 +30,7 @@ func main() {
 			print(err.Error)
 		}
 	}
+
+	// Start backup with git
+	startBackup()
 }
