@@ -42,5 +42,5 @@ func main() {
 	}
 
 	// Commit and push changes
-	// commitBackup()
+	commitBackup()
 }

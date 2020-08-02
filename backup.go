@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 )
 
 func setupRepo() {
@@ -35,11 +36,12 @@ func checkForGit() bool {
 }
 
 func commitBackup() {
-	cmd := exec.Command("git", "add *")
+	// Commit and push all new updated notes in dir
+	cmd := exec.Command("/bin/sh", "-c", "git add *;git commit -a -m 'Backup "+time.Now().Format("02.01.06 - 15:04:05")+"'; git push")
 	cmd.Dir = GitRepoFolder
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Couldn't run 'git add *'")
+		fmt.Println("Couldn't commit backup: ", err)
 		os.Exit(1)
 	}
 }
