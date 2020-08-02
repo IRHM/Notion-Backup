@@ -49,7 +49,21 @@ func getSettings() error {
 	if end.GitRepoFolder != "" {
 		GitRepoFolder = end.GitRepoFolder
 	} else {
-		GitRepoFolderInput := askForSetting("Git repo folder: ")
+		var GitRepoFolderInput string
+
+		// Get git repo from user & keep asking until user gives a folder that exists
+		for {
+			GitRepoFolderInput = askForSetting("Git repo folder: ")
+
+			_, err := os.Stat(GitRepoFolderInput)
+			if os.IsNotExist(err) {
+				fmt.Println("That folder does not exist. Make sure you are using the correct path!")
+				GitRepoFolderInput = askForSetting("Git repo folder: ")
+			} else {
+				break
+			}
+		}
+
 		end.GitRepoFolder = GitRepoFolderInput
 
 		didAppnd++
