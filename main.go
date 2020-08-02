@@ -7,6 +7,12 @@ import (
 )
 
 func main() {
+	var nogit bool = false
+	if os.Args[1] == "nogit" {
+		nogit = true
+		fmt.Println("Ok, won't backup to git. Will still move exported files to GitRepoFolder.")
+	}
+
 	// Get settings from settings.json
 	// If they don't exist, create them
 	err := getSettings()
@@ -14,14 +20,16 @@ func main() {
 		fmt.Println("Error getting settings: ", err)
 	}
 
-	// Check if git is accessible
-	if !checkForGit() {
-		fmt.Println("Can't access git, make sure it is in your $PATH.")
-		os.Exit(1)
-	}
+	if !nogit {
+		// Check if git is accessible
+		if !checkForGit() {
+			fmt.Println("Can't access git, make sure it is in your $PATH.")
+			os.Exit(1)
+		}
 
-	// Check if GitRepoFolder exists and is a git repo
-	setupRepo()
+		// Check if GitRepoFolder exists and is a git repo
+		setupRepo()
+	}
 
 	// Download backup & get full path to it
 	files := getBackup()
@@ -41,8 +49,10 @@ func main() {
 		}
 	}
 
-	// Commit and push changes
-	commitBackup()
+	if !nogit {
+		// Commit and push changes
+		commitBackup()
+	}
 
 	fmt.Println("Done backing up.")
 }
