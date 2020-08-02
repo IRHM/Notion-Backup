@@ -9,37 +9,85 @@ import (
 )
 
 type settings struct {
-	APITokenV2 string `json:"API_TOKEN_V2"`
+	APITokenV2    string `json:"API_TOKEN_V2"`
+	GitRepoFolder string `json:"GIT_REPO_FOLDER"`
 }
 
-// APITokenV2 setting
+// APITokenV2 : Users token for notion api
 var APITokenV2 string
 
+// GitRepoFolder : Where should program find git repository
+var GitRepoFolder string
+
 func getSettings() error {
+	// Get settings file, create if doesn't exist
 	file := getSettingsFile()
 
+	// Read everything in settings file
 	s, err := readSettings(file)
 	if err != nil {
 		return errors.New("Error getting settings: " + err.Error())
-	}
-
-	if len(s) < 1 {
-		// If settings file is empty then ask user for settings and write them
-		err := writeSettings(file)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		s, err = readSettings(file)
 	}
 
 	// Deserialize json settings
 	end := settings{}
 	json.Unmarshal(s, &end)
 
-	APITokenV2 = end.APITokenV2
+	var didAppnd int = 0
+
+	// Check if each setting is in json file, if they aren't ask for them and write them
+
+	if end.APITokenV2 != "" {
+		APITokenV2 = end.APITokenV2
+	} else {
+		APITokenV2Input := askForSetting("API Token: ")
+		end.APITokenV2 = APITokenV2Input
+
+		didAppnd++
+	}
+
+	if end.GitRepoFolder != "" {
+		GitRepoFolder = end.GitRepoFolder
+	} else {
+		GitRepoFolderInput := askForSetting("Git repo folder: ")
+		end.GitRepoFolder = GitRepoFolderInput
+
+		didAppnd++
+	}
+
+	// If did append settings, write all settings back to file
+	if didAppnd > 0 {
+		err := writeSettings(file, end)
+		if err != nil {
+			return err
+		}
+
+		// Re-run getSettings to set global setting vars
+		getSettings()
+	}
 
 	return nil
+}
+
+func writeSettings(file string, s settings) error {
+	// Serialize json request
+	settingsJSON, err := json.Marshal(s)
+	if err != nil {
+		return errors.New("Error writing settings: " + err.Error())
+	}
+
+	// Write settings
+	ioutil.WriteFile(file, settingsJSON, 0644)
+
+	return nil
+}
+
+func askForSetting(question string) string {
+	fmt.Println(question)
+	var response string
+	fmt.Scanln(&response)
+
+	return response
 }
 
 func readSettings(file string) ([]byte, error) {
@@ -50,28 +98,6 @@ func readSettings(file string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func writeSettings(file string) error {
-	// Get user input for api token
-	fmt.Println("API token_v2: ")
-	var APITokenV2Input string
-	fmt.Scanln(&APITokenV2Input)
-
-	s := &settings{
-		APITokenV2: APITokenV2Input,
-	}
-
-	// Serialize json request
-	settingsJSON, err := json.Marshal(s)
-	if err != nil {
-		return err
-	}
-
-	// Write settings
-	ioutil.WriteFile(file, settingsJSON, 0644)
-
-	return nil
 }
 
 func getSettingsFile() string {
