@@ -82,7 +82,7 @@ func enqueueTask() []string {
 		// Serialize json request
 		reqBody, err := json.Marshal(t)
 		if err != nil {
-			print("error")
+			fmt.Println("Error serializing json: ", err)
 		}
 
 		// Send request
@@ -116,7 +116,7 @@ func downloadExport(taskID string) string {
 		// Serialize json request
 		reqBody, err := json.Marshal(t)
 		if err != nil {
-			print("Error serializing json: ", err)
+			fmt.Println("Error serializing json: ", err)
 		}
 
 		// Request task info
@@ -136,7 +136,7 @@ func downloadExport(taskID string) string {
 		}
 
 		// Wait an extra second and tell user
-		fmt.Println("Checking if file is done again in 2 seconds...")
+		fmt.Print(" ... Retry in 2s")
 		time.Sleep(1000 * time.Millisecond)
 	}
 
@@ -146,27 +146,27 @@ func downloadExport(taskID string) string {
 	// Get the response bytes from the url
 	resp, err := http.Get(exportURL)
 	if err != nil {
-		print("Error downloading file: ", err)
+		fmt.Println("Error downloading file: ", err)
 	}
 	defer resp.Body.Close()
 
 	// Create an empty file
 	file, err := os.Create(filename)
 	if err != nil {
-		print("Error creating file: ", err)
+		fmt.Println("Error creating file: ", err)
 	}
 	defer file.Close()
 
 	// Write the bytes to the file
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		print("Error writing to file: ", err)
+		fmt.Println("Error writing to file: ", err)
 	}
 
 	// Return downloaded files full path
 	path, err := filepath.Abs(filename)
 	if err != nil {
-		print("Error getting exported zips absolute path ", err)
+		fmt.Println("Error getting exported zips absolute path ", err)
 	}
 
 	return path
