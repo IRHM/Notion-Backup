@@ -62,7 +62,7 @@ func enqueueTask() []string {
 	blockIDS := getPages()
 
 	for _, val := range blockIDS {
-		fmt.Println("Working on: ", val)
+		fmt.Print("Working on: ", val)
 
 		t := &exportRequest{
 			Task: &exportTask{
@@ -94,6 +94,8 @@ func enqueueTask() []string {
 
 		// Download export and add its full path to 'exportedFiles'
 		exportedFiles = append(exportedFiles, downloadExport(end.TaskID))
+
+		fmt.Println(" ... Completed!")
 	}
 
 	return exportedFiles

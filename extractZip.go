@@ -11,6 +11,8 @@ import (
 
 // Extract zip
 func extract(file string, dest string) error {
+	fmt.Println("Extracting " + file)
+
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
 
 	r, err := zip.OpenReader(file)

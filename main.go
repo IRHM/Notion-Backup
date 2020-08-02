@@ -43,4 +43,6 @@ func main() {
 
 	// Commit and push changes
 	commitBackup()
+
+	fmt.Println("Done backing up.")
 }

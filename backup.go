@@ -36,12 +36,18 @@ func checkForGit() bool {
 }
 
 func commitBackup() {
+	fmt.Println("Committing and pushing updated notes.")
+
+	commitMsg := "Backup " + time.Now().Format("02.01.06 - 15:04:05") + ""
+
 	// Commit and push all new updated notes in dir
-	cmd := exec.Command("/bin/sh", "-c", "git add *;git commit -a -m 'Backup "+time.Now().Format("02.01.06 - 15:04:05")+"'; git push")
+	cmd := exec.Command("/bin/sh", "-c", "git add *;git commit -a -m '"+commitMsg+"'; git push")
 	cmd.Dir = GitRepoFolder
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println("Couldn't commit backup: ", err)
 		os.Exit(1)
 	}
+
+	fmt.Println("Pushed Commit '" + commitMsg + "'")
 }
