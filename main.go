@@ -8,9 +8,16 @@ import (
 
 func main() {
 	var nogit bool = false
-	if os.Args[1] == "nogit" {
-		nogit = true
-		fmt.Println("Ok, won't backup to git. Will still move exported files to GitRepoFolder.")
+
+	// Check if any args have been set
+	if len(os.Args) > 1 {
+		if os.Args[1] == "nogit" {
+			nogit = true
+			fmt.Println("Ok, won't backup to git. Will still move exported files to GitRepoFolder.")
+		} else {
+			fmt.Println("The only supported arg is 'nogit'")
+			os.Exit(1)
+		}
 	}
 
 	// Get settings from settings.json
