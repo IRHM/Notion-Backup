@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -13,13 +14,22 @@ func main() {
 		fmt.Println("Error getting settings: ", err)
 	}
 
-	// Download backup a get full path to it
+	// Check if git is accessible
+	if !checkForGit() {
+		fmt.Println("Can't access git, make sure it is in your $PATH.")
+		os.Exit(1)
+	}
+
+	// Check if GitRepoFolder exists and is a git repo
+	setupRepo()
+
+	// Download backup & get full path to it
 	files := getBackup()
 
-	// Foreach export zip, extract to 'export' folder then delete zip
+	// Foreach export zip, extract to gitrepo folder then delete zip
 	for _, file := range files {
 		// Extract downloaded backup
-		err := extract(file, "./export")
+		err := extract(file, filepath.Join(GitRepoFolder, "notes"))
 		if err != nil {
 			print(err.Error)
 		}
@@ -31,6 +41,6 @@ func main() {
 		}
 	}
 
-	// Start backup with git
-	startBackup()
+	// Commit and push changes
+	// commitBackup()
 }
