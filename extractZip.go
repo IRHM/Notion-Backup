@@ -23,7 +23,7 @@ func extract(file string, dest string) error {
 		}
 	}()
 
-	os.MkdirAll(dest, 0755)
+	os.MkdirAll(dest, 0766)
 
 	extractAndWriteFile := func(f *zip.File) error {
 		path := filepath.Join(dest, f.Name)
@@ -46,6 +46,13 @@ func extract(file string, dest string) error {
 			os.MkdirAll(path, f.Mode())
 		} else {
 			os.MkdirAll(filepath.Dir(path), f.Mode())
+
+			// Set perms for file
+			err := os.Chmod(filepath.Dir(path), 0766)
+			if err != nil {
+				panic(err)
+			}
+
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return err
@@ -56,6 +63,7 @@ func extract(file string, dest string) error {
 				}
 			}()
 
+			// Copy files contents
 			_, err = io.Copy(f, rc)
 			if err != nil {
 				return err
