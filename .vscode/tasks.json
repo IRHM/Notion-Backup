@@ -4,7 +4,7 @@
     {
       "label": "Build and run",
       "type": "shell",
-      "command": "go build && ./Notion-Backup",
+      "command": "go run .",
       "group": {
         "kind": "build",
         "isDefault": true
