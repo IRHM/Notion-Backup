@@ -30,7 +30,7 @@ func main() {
 	if !nogit {
 		// Check if git is accessible
 		if !checkForGit() {
-			fmt.Println("Can't access git, make sure it is in your $PATH.")
+			fmt.Println("Can't access git, make sure it is in your $PATH variable.")
 			os.Exit(1)
 		}
 
