@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -40,24 +39,11 @@ func checkForGit() bool {
 func commitBackup() {
 	fmt.Println("Committing and pushing updated notes.")
 
-	shell := "/bin/sh"
 	commitMsg := "Backup " + time.Now().Format("02.01.06 - 15:04:05") + ""
-
-	// If on windows change shell to powershell
-	if runtime.GOOS == "windows" {
-		shell = "powershell"
-	}
-
 	commands := [3]string{"git add *", "git commit -a -m \"" + commitMsg + "\"", "git push"}
 
 	for _, command := range commands {
-		cmd := exec.Command(shell, "/c", command)
-		cmd.Dir = GitRepoFolder
-
-		// Connect standard input so git can prompt user to login
-		cmd.StdinPipe()
-
-		out, err := cmd.CombinedOutput()
+		out, err := runCommand(command, GitRepoFolder, true)
 		if err != nil {
 			outStr := strings.ToLower(string(out))
 
