@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 )
@@ -17,9 +16,7 @@ func setupRepo() {
 	}
 
 	// Check if folder is a git repository
-	cmd := exec.Command("git", "status")
-	cmd.Dir = GitRepoFolder
-	err = cmd.Run()
+	_, err = runCommand("git status", GitRepoFolder, false)
 	if err != nil {
 		fmt.Println("Folder is not initialized with git.")
 		os.Exit(1)
@@ -27,8 +24,7 @@ func setupRepo() {
 }
 
 func checkForGit() bool {
-	cmd := exec.Command("git", "--version")
-	err := cmd.Run()
+	_, err := runCommand("git --version", "", false)
 	if err != nil {
 		return false
 	}
