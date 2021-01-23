@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -58,8 +59,15 @@ func commitBackup() {
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Println(fmt.Sprint(err) + ": " + string(out))
-			os.Exit(1)
+			if strings.Contains(string(out), "nothing to commit") {
+				fmt.Println("No updated notes to commit.")
+			} else if strings.Contains(string(out), "authentication failed") {
+				fmt.Println("Authentication failed! Login and save credentials for git in the command line or follow authentication prompt.")
+				os.Exit(1)
+			} else {
+				fmt.Println(fmt.Sprint(err) + ": " + string(out))
+				os.Exit(1)
+			}
 		}
 
 		// Only log output from git if it isn't empty
