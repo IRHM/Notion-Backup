@@ -10,9 +10,12 @@ Backup all of your notion notes, and optionally upload them to a git repo.
 4. (Happens only first time) Enter the path to the folder you created in step 1.
 5. Wait for Notion-Backup to download your notes.
 6. If asked for authentication:
-    - Windows
+    - **Windows**
+    
       On windows a prompt will open allowing you to login to Git through the web browser or by using a personal access token.
-    - Linux
+      
+    - **Linux**
+    
       On Linux you will be asked for a username and password in the command line. If you have 2FA enabled, use a personal access token
       as your password with the `repo` privilege set.
 
