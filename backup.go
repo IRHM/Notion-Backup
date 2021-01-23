@@ -59,20 +59,17 @@ func commitBackup() {
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			if strings.Contains(string(out), "nothing to commit") {
+			outStr := strings.ToLower(string(out))
+
+			if strings.Contains(outStr, "nothing to commit") {
 				fmt.Println("No updated notes to commit.")
-			} else if strings.Contains(string(out), "authentication failed") {
+			} else if strings.Contains(outStr, "authentication failed") {
 				fmt.Println("Authentication failed! Login and save credentials for git in the command line or follow authentication prompt.")
 				os.Exit(1)
 			} else {
 				fmt.Println(fmt.Sprint(err) + ": " + string(out))
 				os.Exit(1)
 			}
-		}
-
-		// Only log output from git if it isn't empty
-		if string(out) != "" {
-			fmt.Println("Git: " + string(out))
 		}
 	}
 
