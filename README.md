@@ -6,6 +6,9 @@ Backup all of your notion notes, and optionally upload them to a git repo.
 0. Make sure you have git installed and it's in your $PATH variable.
 1. Create a folder where you want to export your notion notes to and optionally make it a git repo.
 2. Run Notion-Backup executable, if you don't want to backup to a git repo append `nogit` to the end of the command (eg. `./Notion-Backup nogit`).
+
+    Run Notion-Backup from your cli (e.g., on windows open cmd and execute Notion-Backup.exe from there, if on linux do the same but in your shell).
+    You can probably skip this if you have your Git login saved, but if you encounter any errors, try running from your shell.
 3. (Happens only first time) Enter your API Token (look below on how to get it).
 4. (Happens only first time) Enter the path to the folder you created in step 1.
 5. Wait for Notion-Backup to download your notes.
